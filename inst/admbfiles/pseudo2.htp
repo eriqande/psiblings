@@ -1,0 +1,83 @@
+#if !defined(_pseudo2_)
+#  define _pseudo2_
+
+class model_data : public ad_comm{
+  data_int n;
+  data_int S;
+  data_imatrix A;
+  data_imatrix B;
+  data_vector position;
+  data_vector reach;
+  data_ivector max_allele;
+  data_matrix f;
+  data_number eps_error;
+  int N;
+  dvector L1;
+  dvector L2;
+  dvector L3;
+  dvector d;
+  double mean_d;
+  ivector I;
+  ivector J;
+  data_int fit_reg;
+  data_int include_PO;
+  data_int print_posterior;
+  ~model_data();
+  model_data(int argc,char * argv[]);
+  friend class model_parameters;
+};
+
+class model_parameters : public model_data ,
+  public function_minimizer
+{
+public:
+  ~model_parameters();
+  void preliminary_calculations(void);
+  void set_runtime(void);
+  virtual void * mycast(void) {return (void*)this;}
+  static int mc_phase(void)
+  {
+    return initial_params::mc_phase;
+  }
+  static int mceval_phase(void)
+  {
+    return initial_params::mceval_phase;
+  }
+  static int sd_phase(void)
+  {
+    return initial_params::sd_phase;
+  }
+  static int current_phase(void)
+  {
+    return initial_params::current_phase;
+  }
+  static int last_phase(void)
+  {
+    return (initial_params::current_phase
+      >=initial_params::max_number_phases);
+  }
+  static prevariable current_feval(void)
+  {
+    return *objective_function_value::pobjfun;
+  }
+private:
+  ivector integer_control_flags;
+  dvector double_control_flags;
+  param_init_bounded_number a;
+  param_init_bounded_number b;
+  param_init_bounded_number a_hs;
+  param_init_bounded_number b_hs;
+  param_init_bounded_number a_po;
+  param_init_bounded_number b_po;
+  param_number prior_function_value;
+  param_number likelihood_function_value;
+  objective_function_value ll;
+public:
+  virtual void userfunction(void);
+  virtual void report(void);
+  virtual void final_calcs(void);
+  model_parameters(int sz,int argc, char * argv[]);
+  virtual void initializationfunction(void){}
+
+};
+#endif
